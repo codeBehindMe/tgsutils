@@ -1,1 +1,9 @@
 .idea/
+depths.csv
+sample_submission.csv
+test.zip
+test/
+train.csv
+train.zip
+train/
+__pycache__/

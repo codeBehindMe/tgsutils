@@ -1,6 +1,6 @@
-import glob
-import os
 from enum import Enum
+
+from phasing import Training, Testing
 
 
 class Scope(Enum):
@@ -9,26 +9,13 @@ class Scope(Enum):
     VALIDATION = 3
 
 
-class Training:
-
-    def __init__(self, training_folder):
-        self.tr_folder = training_folder
-        self.training_images = None
-        self.training_masks = None
-        self.image_names = None
-        self.img_paths = None
-
-    def sync_image_metadata(self):
-        path = os.path.join(self.training_images, "images/*")
-        self.img_paths = glob.glob(path)
-        self.image_names = list(map(os.path.basename, self.img_paths))
-
-
 class Explore:
     def __init__(self, training_folder: str, test_folder: str):
         self.tr_folder = training_folder
         self.ts_folder = test_folder
         self.scope = None
+        self.core = Training(training_folder)  # FIXME : This is set so that IDE can get type hints. Set to None.
+        self.__state__ = {"DEFAULT_SCOPE": None}
 
     @property
     def TEST(self):
@@ -40,5 +27,50 @@ class Explore:
         self.scope = Scope.TRAIN
         return self
 
-    def random_method(self):
-        print(self.scope)
+    def __load_scope__(self):
+        """
+        Loads the object corresponding to the current scope.
+        :return:
+        """
+        if self.scope == Scope.TRAIN:
+            self.core = Training(self.tr_folder)
+            return
+        if self.scope == Scope.TEST:
+            self.core = Testing(self.ts_folder)
+            return
+        raise AttributeError("Havent set training or test! Please do so by calling TRAIN or TEST or set Default Scope.")
+
+    def __reset_scope__(self):
+        """
+        Reset's the scope after a call has been made.
+        :return:
+        """
+        self.scope = self.__state__['DEFAULT_SCOPE']
+
+    def set_default_scope(self, scope: Scope):
+        """
+        Set's the default scope for this instance so you don't have to call the SCOPE properties before calling
+        methods.
+        :param scope: Scope to change to.
+        :return:
+        """
+        self.__state__['DEFAULT_SCOPE'] = scope
+        self.scope = scope
+        return self
+
+    def get_image_names(self) -> [str]:
+        """
+        Returns a list of image names available.
+        :return:
+        """
+        self.__load_scope__()
+        result = self.core.image_names
+        self.__reset_scope__()
+        return result
+
+
+if __name__ == '__main__':
+    x = Explore("train", "test")
+    print(x.scope)
+    print(x.TRAIN.get_image_names())
+    print(x.scope)
