@@ -1,4 +1,5 @@
 from enum import Enum
+from functools import wraps
 
 from phasing import Training, Testing
 
@@ -47,6 +48,16 @@ class Explore:
         """
         self.scope = self.__state__['DEFAULT_SCOPE']
 
+    def maintain_scope(f):
+        @wraps(f)
+        def wrapped(inst, *args, **kwargs):
+            inst.__load_scope__()
+            f_result = f(inst, *args, **kwargs)
+            inst.__reset_scope__()
+            return f_result
+
+        return wrapped
+
     def set_default_scope(self, scope: Scope):
         """
         Set's the default scope for this instance so you don't have to call the SCOPE properties before calling
@@ -58,14 +69,13 @@ class Explore:
         self.scope = scope
         return self
 
+    @maintain_scope
     def get_image_names(self) -> [str]:
         """
         Returns a list of image names available.
         :return:
         """
-        self.__load_scope__()
         result = self.core.image_names
-        self.__reset_scope__()
         return result
 
 
