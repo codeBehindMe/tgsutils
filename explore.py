@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 from functools import wraps
 
@@ -70,13 +71,30 @@ class Explore:
         return self
 
     @maintain_scope
-    def get_image_names(self) -> [str]:
+    def get_image_names(self, include_extension=False) -> [str]:
         """
         Returns a list of image names available.
         :return:
         """
-        result = self.core.image_names
-        return result
+        if include_extension:
+            return [os.path.basename(file) for file in self.core.img_paths]
+        else:
+            return [os.path.splitext(os.path.basename(file))[0] for file in self.core.img_paths]
+
+    @maintain_scope
+    def get_mask_names(self, include_extension=False) -> [str]:
+        """
+        Returns a list of mask names. Only works if scope is training.
+        :param include_extension:
+        :return: List of mask names
+        """
+        if self.scope == Scope.TRAIN:
+            if include_extension:
+                return [os.path.basename(file) for file in self.core.msk_paths]
+            else:
+                return [os.path.splitext(os.path.basename(file))[0] for file in self.core.msk_paths]
+        else:
+            raise ValueError("Masks are only availbe for the training set")
 
 
 if __name__ == '__main__':
@@ -84,3 +102,4 @@ if __name__ == '__main__':
     print(x.scope)
     print(x.TRAIN.get_image_names())
     print(x.scope)
+    print(x.TRAIN.get_mask_names())

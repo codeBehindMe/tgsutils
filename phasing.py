@@ -1,9 +1,9 @@
 import glob
 import os
-from abc import abstractmethod
+from abc import abstractmethod, ABCMeta
 
 
-class Phase:
+class Phase(metaclass=ABCMeta):
     @abstractmethod
     def feed_images(self):
         """
@@ -16,19 +16,25 @@ class Phase:
 
 class Training(Phase):
 
+    def feed_images(self):
+        pass
+
     def __init__(self, training_folder: str):
         super().__init__()
         self.tr_folder = training_folder
         self.training_images = None
         self.training_masks = None
-        self.image_names = None
         self.img_paths = None
-        self.sync_image_metadata()
+        self.msk_paths = None
+        self.__sync_metadata__()
 
-    def sync_image_metadata(self):
-        path = os.path.join(self.tr_folder, "images/*")
-        self.img_paths = glob.glob(path)
-        self.image_names = list(map(os.path.basename, self.img_paths))
+    def __sync_metadata__(self):
+        """
+        Get's basic metadata for the class operation
+        :return:
+        """
+        self.img_paths = glob.glob(os.path.join(self.tr_folder, "images/*"))
+        self.msk_paths = glob.glob(os.path.join(self.tr_folder, "masks/*"))
 
 
 class Testing(Phase):
