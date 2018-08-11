@@ -18,10 +18,10 @@ class Training:
         self.image_names = None
         self.img_paths = None
 
-    def load_images(self):
+    def sync_image_metadata(self):
         path = os.path.join(self.training_images, "images/*")
         self.img_paths = glob.glob(path)
-        self.image_names = map(os.path.basename, self.img_paths)
+        self.image_names = list(map(os.path.basename, self.img_paths))
 
 
 class Explore:
@@ -42,9 +42,3 @@ class Explore:
 
     def random_method(self):
         print(self.scope)
-
-
-if __name__ == '__main__':
-    x = Explore("hello", "mellow")
-    x.random_method()
-    x.TEST.random_method()
