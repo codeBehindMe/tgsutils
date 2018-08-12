@@ -1,6 +1,9 @@
+import itertools
 import os
 from enum import Enum
 from functools import wraps
+
+import numpy as np
 
 from phasing import Training, Testing
 
@@ -40,7 +43,8 @@ class Explore:
         if self.scope == Scope.TEST:
             self.core = Testing(self.ts_folder)
             return
-        raise AttributeError("Havent set training or test! Please do so by calling TRAIN or TEST or set Default Scope.")
+        raise AttributeError(
+            "Haven't set training or test! Please do so by calling TRAIN or TEST or set Default Scope.")
 
     def __reset_scope__(self):
         """
@@ -96,10 +100,91 @@ class Explore:
         else:
             raise ValueError("Masks are only availbe for the training set")
 
+    @maintain_scope
+    def get_all_images(self) -> [np.ndarray]:
+        """
+        Returns all images as numpy arrays
+        :return:
+        """
+
+        for img in self.core.get_all_images():
+            return img
+
+    @maintain_scope
+    def get_image_by_index(self, index):
+        """
+        Returns the image at the specified index.
+        :param index:
+        :return:
+        """
+        return next(itertools.islice(self.core.get_all_images(), index, index + 1))
+
+    @maintain_scope
+    def get_image_by_name(self, name: str) -> np.ndarray:
+        return self.get_image_by_index(self.get_image_names().index(os.path.splitext(name)[0]))
+
+    @maintain_scope
+    def get_image_sample(self, sample_size: int, random=False) -> [np.ndarray]:
+        """
+        Returns a subsample of images at the sample size. Can specify random to randomise the sample or preserve order.
+        :param sample_size: Size of the sample required.
+        :param random: Randomise or not.
+        :return:
+        """
+        sample_images = []
+        if random:
+            indexes = sorted(np.random.randint(0, self.core.iterable_size - 1, sample_size))
+            i = 0
+            try:
+                for img in self.core.get_all_images():
+                    if i == indexes[0]:
+                        sample_images.append(img)
+                        indexes.pop(0)
+                        i += 1
+                    else:
+                        i += 1
+                        continue
+            except IndexError:
+                pass
+
+        else:
+            imgs = self.core.get_all_images()
+            return [next(imgs) for x in range(sample_size)]
+        return sample_images
+
+    @maintain_scope
+    def get_images(self, **kwargs) -> iter:
+        """
+        Returns images based on what's required. Calling this method with no keyword arguments returns all images as
+        numpy arrays.
+        :return:
+        """
+        try:
+            return self.get_image_by_name(kwargs['name'])
+        except KeyError:
+            pass
+        try:
+            return self.get_image_by_index(kwargs['index'])
+        except KeyError:
+            pass
+        try:
+            return self.get_image_sample(kwargs['sample'], False)
+        except KeyError:
+            pass
+        try:
+            return self.get_image_sample(kwargs['random_sample'], True)
+        except KeyError:
+            pass
+        return self.get_all_images()
+
 
 if __name__ == '__main__':
     x = Explore("train", "test")
-    print(x.scope)
-    print(x.TRAIN.get_image_names())
-    print(x.scope)
-    print(x.TRAIN.get_mask_names())
+    # print(x.scope)
+    # print(x.TRAIN.get_image_names())
+    # print(x.scope)
+    # print(x.TRAIN.get_mask_names())
+    #
+    # print(x.TRAIN.get_all_images()[0])
+
+    print(x.TRAIN.get_image_sample(3, False).__len__())

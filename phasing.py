@@ -2,10 +2,12 @@ import glob
 import os
 from abc import abstractmethod, ABCMeta
 
+import cv2
+
 
 class Phase(metaclass=ABCMeta):
     @abstractmethod
-    def feed_images(self):
+    def get_all_images(self):
         """
         Returns all images.
         :return:
@@ -16,8 +18,13 @@ class Phase(metaclass=ABCMeta):
 
 class Training(Phase):
 
-    def feed_images(self):
-        pass
+    def get_all_images(self):
+        """
+        Returns all images as numpy matricies.
+        :return:
+        """
+        for i in self.img_paths:
+            yield cv2.imread(i)
 
     def __init__(self, training_folder: str):
         super().__init__()
@@ -26,6 +33,7 @@ class Training(Phase):
         self.training_masks = None
         self.img_paths = None
         self.msk_paths = None
+        self.iterable_size = None
         self.__sync_metadata__()
 
     def __sync_metadata__(self):
@@ -35,6 +43,7 @@ class Training(Phase):
         """
         self.img_paths = glob.glob(os.path.join(self.tr_folder, "images/*"))
         self.msk_paths = glob.glob(os.path.join(self.tr_folder, "masks/*"))
+        self.iterable_size = len(self.img_paths)
 
 
 class Testing(Phase):
