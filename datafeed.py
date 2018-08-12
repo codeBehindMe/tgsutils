@@ -1,4 +1,5 @@
 import itertools
+import operator
 import os
 from enum import Enum
 from functools import wraps
@@ -14,7 +15,7 @@ class Scope(Enum):
     VALIDATION = 3
 
 
-class Explore:
+class DataFeed:
     def __init__(self, training_folder: str, test_folder: str):
         self.tr_folder = training_folder
         self.ts_folder = test_folder
@@ -44,7 +45,7 @@ class Explore:
             self.core = Testing(self.ts_folder)
             return
         raise AttributeError(
-            "Haven't set training or test! Please do so by calling TRAIN or TEST or set Default Scope.")
+            "Haven't set training or test! Please do so by calling TRAIN or TEST or set default scope.")
 
     def __reset_scope__(self):
         """
@@ -54,6 +55,11 @@ class Explore:
         self.scope = self.__state__['DEFAULT_SCOPE']
 
     def maintain_scope(f):
+        """
+        Decorator to maintain scope when endpoint methods are called.
+        :return:
+        """
+
         @wraps(f)
         def wrapped(inst, *args, **kwargs):
             inst.__load_scope__()
@@ -131,26 +137,14 @@ class Explore:
         :param random: Randomise or not.
         :return:
         """
-        sample_images = []
         if random:
             indexes = sorted(np.random.randint(0, self.core.iterable_size - 1, sample_size))
-            i = 0
-            try:
-                for img in self.core.get_all_images():
-                    if i == indexes[0]:
-                        sample_images.append(img)
-                        indexes.pop(0)
-                        i += 1
-                    else:
-                        i += 1
-                        continue
-            except IndexError:
-                pass
-
+            for i in operator.itemgetter(*indexes)(self.get_image_names()):
+                self.core.get_image_by_name(i)
+            return [self.core.get_image_by_name(name) for name in operator.itemgetter(*indexes)(self.get_image_names)]
         else:
             imgs = self.core.get_all_images()
             return [next(imgs) for x in range(sample_size)]
-        return sample_images
 
     @maintain_scope
     def get_images(self, **kwargs) -> iter:
@@ -179,7 +173,7 @@ class Explore:
 
 
 if __name__ == '__main__':
-    x = Explore("train", "test")
+    x = DataFeed("train", "test")
     # print(x.scope)
     # print(x.TRAIN.get_image_names())
     # print(x.scope)

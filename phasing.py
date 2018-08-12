@@ -3,6 +3,7 @@ import os
 from abc import abstractmethod, ABCMeta
 
 import cv2
+import numpy as np
 
 
 class Phase(metaclass=ABCMeta):
@@ -12,19 +13,54 @@ class Phase(metaclass=ABCMeta):
         Returns all images.
         :return:
         """
+        pass
 
-        return
+    @abstractmethod
+    def get_image_by_name(self, name: str):
+        """
+        Returns the image for the specified name.
+        :param name:
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def get_all_masks(self):
+        """
+        Returns all masks.
+        :return:
+        """
+        pass
+
+    @abstractmethod
+    def get_mask_by_name(self, name: str) -> np.ndarray:
+        """
+        Returns the mask for the specified name.
+        :param name:
+        :return:
+        """
+        pass
 
 
 class Training(Phase):
 
-    def get_all_images(self):
-        """
-        Returns all images as numpy matricies.
-        :return:
-        """
-        for i in self.img_paths:
-            yield cv2.imread(i)
+    def get_image_by_name(self, name: str) -> np.ndarray:
+        for path in self.img_paths:
+            if os.path.splitext(os.path.basename(path)[0]) == name:
+                return cv2.imread(path)
+
+    def get_all_images(self) -> iter:
+        for path in self.img_paths:
+            yield cv2.imread(path)
+
+    def get_all_masks(self) -> iter:
+        for path in self.msk_paths:
+            yield cv2.imread(path)
+
+    def get_mask_by_name(self, name: str) -> np.ndarray:
+        for path in self.msk_paths:
+            if os.path.splitext(os.path.basename(path)[0]) == name:
+                return cv2.imread(path)
 
     def __init__(self, training_folder: str):
         super().__init__()
