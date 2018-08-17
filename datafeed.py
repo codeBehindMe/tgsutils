@@ -209,8 +209,8 @@ class DataFeed:
     @maintain_scope
     def get_images(self, **kwargs) -> iter:
         """
-        Returns images based on what's required. Calling this method with no keyword arguments returns all images as
-        numpy arrays.
+        Returns images based on what's required. Calling this method with no
+        keyword arguments returns all images as numpy arrays.
         :return:
         """
         try:
@@ -234,7 +234,8 @@ class DataFeed:
     @maintain_scope
     def get_masks(self, **kwargs) -> np.ndarray:
         """
-        Returns masks based on what's required. Calling this method with no arguments returns all masks.
+        Returns masks based on what's required. Calling this method with no
+        arguments returns all masks.
         :param kwargs:
         :return:
         """
