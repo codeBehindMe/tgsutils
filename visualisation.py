@@ -29,4 +29,4 @@ class Plot:
         """
         flat = img.flatten()
         data = [go.Histogram(x=flat, **kwargs)]
-        py.iplot(data, **kwargs)
+        return py.iplot(data, **kwargs)
