@@ -263,7 +263,6 @@ class DataFeed:
         Returns tuples of images and masks for all available masks.
         :return:
         """
-        # FIXME: Zip iterator not working ***
         if self.scope != Scope.TRAIN:
             raise ValueError("Can only call this from TRAIN scope.")
         else:
@@ -306,15 +305,4 @@ class DataFeed:
         :param random: Shuffle parameter.
         :return:
         """
-        return
-
-
-if __name__ == '__main__':
-    x = DataFeed("train", "test")
-    # print(x.scope)
-    # print(x.TRAIN.get_image_names())
-    # print(x.scope)
-    # print(x.TRAIN.get_mask_names())
-    #
-    # print(x.TRAIN.get_all_images()[0])
-    print(x.TRAIN.get_all()[0][0].shape)
+        raise NotImplementedError()
