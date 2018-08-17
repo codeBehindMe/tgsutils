@@ -20,8 +20,7 @@ class DataFeed:
         self.tr_folder = training_folder
         self.ts_folder = test_folder
         self.scope = None
-        # FIXME : This is set so that IDE can get type hints. Set to None.
-        self.core = Training(training_folder)
+        self.core = None
         self.__state__ = {"DEFAULT_SCOPE": None}
 
     @property
