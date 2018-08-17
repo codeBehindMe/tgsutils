@@ -6,7 +6,7 @@ from functools import wraps
 
 import numpy as np
 
-from phasing import Training, Testing
+from .phasing import Training, Testing
 
 
 class Scope(Enum):
