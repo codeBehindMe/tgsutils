@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import plotly.graph_objs as go
-import plotly.plotly as py
+import plotly.offline as py
 
 
 class Plot:
