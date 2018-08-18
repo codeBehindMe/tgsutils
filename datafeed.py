@@ -121,8 +121,7 @@ class DataFeed:
         :return:
         """
 
-        for img in self.core.get_all_images():
-            return img
+        return [img for img in self.core.get_all_images()]
 
     @maintain_scope
     def get_image_by_index(self, index):
