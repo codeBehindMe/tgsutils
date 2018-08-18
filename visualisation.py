@@ -27,3 +27,19 @@ def plot_image_histogram(img: np.ndarray, **kwargs) -> plt.Figure:
     flat = img.flatten()
     data = [go.Histogram(x=flat, **kwargs)]
     return py.iplot(data)
+
+
+def plot_multi_image_column_wise(*args, **kwargs) -> plt.Figure:
+    """
+    This plots multiple images in a column wise fashion.
+    :param args: List of images.
+    :param kwargs: additional keyword arguments to plot options.
+    :return:
+    """
+    _len = len(args)
+    fig = plt.figure(figsize=kwargs.get("figsize", (5, 5)))
+    for i in range(_len):
+        plt.subplot(1, _len, i)
+        plt.imshow(args[i])
+
+    return fig
