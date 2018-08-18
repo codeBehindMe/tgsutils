@@ -38,9 +38,9 @@ def plot_multi_image_column_wise(*args, **kwargs) -> plt.Figure:
     """
     _len = len(args)
 
-    fig = plt.figure(figsize=kwargs.get("figsize", (5, 5)))
+    fig = plt.figure(figsize=kwargs.pop("figsize", (5, 5)))
     for i in range(_len):
         plt.subplot(1, _len, i + 1)
-        plt.imshow(args[i])
+        plt.imshow(args[i], **kwargs)
 
     return fig
