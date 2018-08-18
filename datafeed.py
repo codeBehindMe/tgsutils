@@ -163,8 +163,7 @@ class DataFeed:
         Returns all masks as numpy arrays.
         :return:
         """
-        for msk in self.core.get_all_masks():
-            return msk
+        return [msk for msk in self.core.get_all_masks()]
 
     @maintain_scope
     def get_mask_by_index(self, index):
