@@ -70,7 +70,7 @@ class DataFeed:
 
         return wrapped
 
-    def set_default_scope(self, scope: Scope):
+    def set_default_scope(self, scope: Scope) -> object:
         """
         Set's the default scope for this instance so you don't have to
         call the SCOPE properties before calling methods.

@@ -47,20 +47,20 @@ class Training(Phase):
     def get_image_by_name(self, name: str) -> np.ndarray:
         for path in self.img_paths:
             if os.path.splitext(os.path.basename(path)[0]) == name:
-                return cv2.imread(path)
+                return cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 
     def get_all_images(self) -> iter:
         for path in self.img_paths:
-            yield cv2.imread(path)
+            yield cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 
     def get_all_masks(self) -> iter:
         for path in self.msk_paths:
-            yield cv2.imread(path)
+            yield cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 
     def get_mask_by_name(self, name: str) -> np.ndarray:
         for path in self.msk_paths:
             if os.path.splitext(os.path.basename(path)[0]) == name:
-                return cv2.imread(path)
+                return cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 
     def __init__(self, training_folder: str):
         super().__init__()
