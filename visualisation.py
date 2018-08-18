@@ -37,9 +37,10 @@ def plot_multi_image_column_wise(*args, **kwargs) -> plt.Figure:
     :return:
     """
     _len = len(args)
+
     fig = plt.figure(figsize=kwargs.get("figsize", (5, 5)))
     for i in range(_len):
-        plt.subplot(1, _len, i)
+        plt.subplot(1, _len, i + 1)
         plt.imshow(args[i])
 
     return fig
