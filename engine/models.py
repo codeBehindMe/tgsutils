@@ -1,10 +1,15 @@
-import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras import Input
-from tensorflow.python.keras import Model
+from tensorflow.python.keras.layers import BatchNormalization
 from tensorflow.python.keras.layers import Conv2D, MaxPooling2D, \
     Conv2DTranspose
+from tensorflow.python.keras.layers import Dense
+from tensorflow.python.keras.layers import Flatten
 from tensorflow.python.keras.layers import concatenate
+
+""""
+MARK: ARTIFICIAL INTELLIGENCE
+"""
 
 
 def kaggle_u_net_direct(im_height, im_width, im_chan):
@@ -60,19 +65,44 @@ def kaggle_u_net_direct(im_height, im_width, im_chan):
     return inputs, outputs
 
 
-if __name__ == '__main__':
-    inputs, outputs = kaggle_u_net_direct(128, 128, 1)
-    kaggle_model = Model(inputs=[inputs], outputs=[outputs])
-    kaggle_model.compile(optimizer='adam', loss='binary_crossentropy')
-    kaggle_model.summary()
+def custom_cnn(imh=128, imw=128, imc=128) -> tuple:
+    """
+    Custom feed forward CNN with paired dual conv + pooling layers.
+    This network is geared not to predict pixel-wise likelihood of salt but
+    the probability the image actually contains salt deposits in it.
+    :param imh: Image height
+    :param imw: Image width
+    :param imc: Image channels.
+    :return: Tuple
+    """
 
-    img = np.zeros((101, 101, 1))
-    label = np.zeros((101, 101, 1))
-    tf.image.resize_image_with_crop_or_pad(img, 128, 128)
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-        _img = tf.image.resize_image_with_crop_or_pad(img, 128, 128)
-        _img = tf.reshape(_img, (1, 128, 128, 1))
-        _label = tf.image.resize_image_with_crop_or_pad(label, 128, 128)
-        _label = tf.reshape(_label, (1, 128, 128, 1))
-        kaggle_model.fit(_img, _label, steps_per_epoch=1, epochs=10)
+    inputs = Input((imh, imw, imc))
+    inputs = tf.keras.layers.Lambda(lambda x: x / 255)(inputs)
+
+    c1 = Conv2D(32, (3, 3), activation='relu', padding='same')(inputs)
+    c2 = Conv2D(32, (3, 3), activation='relu', padding='same')(c1)
+    p1 = MaxPooling2D((2, 2))(c2)
+
+    c3 = Conv2D(64, (3, 3), activation='relu', padding='same')(p1)
+    c4 = Conv2D(64, (3, 3), activation='relu', padding='same')(c3)
+    p2 = MaxPooling2D((2, 2))(c4)
+
+    c5 = Conv2D(128, (3, 3), activation='relu', padding='same')(p2)
+    c6 = Conv2D(128, (3, 3), activation='relu', padding='same')(c5)
+    p3 = MaxPooling2D((2, 2))(c6)
+
+    c7 = Conv2D(256, (3, 3), activation='relu', padding='same')(p3)
+    c8 = Conv2D(256, (3, 3), activation='relu', padding='same')(c7)
+    p4 = MaxPooling2D((2, 2))(c8)
+
+    f1 = Flatten(p4)
+
+    d1 = Dense(256, activation='relu')(f1)
+    bn1 = BatchNormalization()(d1)
+
+    d2 = Dense(256, activation='relu')(bn1)
+    bn2 = BatchNormalization()(d2)
+
+    outputs = Dense(1, activation='sigmoid')(bn2)
+
+    return inputs, outputs

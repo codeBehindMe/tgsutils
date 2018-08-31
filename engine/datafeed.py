@@ -1,3 +1,4 @@
+import glob
 import itertools
 import operator
 import os
@@ -5,6 +6,7 @@ from enum import Enum
 from functools import wraps
 
 import numpy as np
+import tensorflow as tf
 
 from .phasing import Training, Testing
 
@@ -303,3 +305,38 @@ class DataFeed:
         :return:
         """
         raise NotImplementedError()
+
+
+class TensorFeed:
+    def __init__(self):
+        self.dataset = None
+        self.image_names = glob.glob(os.path.join("./train/", "images/*"))
+        self.mask_names = glob.glob(os.path.join("./train/", "images/*"))
+
+    def build_dataset(self):
+        self.dataset = tf.data.Dataset.from_tensor_slices(
+            (self.image_names, self.mask_names))
+        self.dataset = self.dataset.shuffle(len(self.image_names))
+        self.dataset = self.dataset.map(self.parse_image_and_label)
+        self.dataset = self.dataset.map(self.preprocess_image_and_mask)
+        self.dataset = self.dataset.batch(32)
+        return self
+
+    @staticmethod
+    def parse_image_and_label(image, mask):
+        img = tf.read_file(image)
+        mask = tf.read_file(mask)
+
+        img = tf.image.decode_png(img, channels=1)
+        mask = tf.image.decode_png(mask, channels=1)
+        return img, mask
+
+    @staticmethod
+    def preprocess_image_and_mask(image, mask):
+        _image = tf.image.resize_image_with_crop_or_pad(image, 128, 128)
+        _mask = tf.image.resize_image_with_crop_or_pad(mask, 128, 128)
+        _image = tf.image.convert_image_dtype(_image, tf.float32)
+        _mask = tf.image.convert_image_dtype(_mask, tf.float32)
+        _mask = tf.clip_by_value(_mask, 0, 1)
+
+        return _image, _mask
